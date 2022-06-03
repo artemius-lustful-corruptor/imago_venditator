@@ -1,4 +1,4 @@
-module image2
+module image-vendicator
 
 go 1.18
 
