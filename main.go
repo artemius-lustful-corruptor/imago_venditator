@@ -1,3 +1,4 @@
+
 package main
 
 import 	"github.com/Davincible/goinsta"
@@ -18,5 +19,5 @@ func main() {
 		instabot.loopTags()
 	}
 
-	//instabot.updateConfig()
+	instabot.updateConfig()
 }

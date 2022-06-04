@@ -89,28 +89,26 @@ func (myInstabot Instabot) syncFollowers() {
 		return
 	}
 
-	fmt.Printf("\n%d users are not following you back!\n", len(users))
-	answer := getInput("Do you want to review these users ? [yN]")
+	//fmt.Printf("\n%d users are not following you back!\n", len(users))
+	//answer := getInput("Do you want to review these users ? [yN]")
 
-	if answer != "y" {
-		fmt.Println("Not unfollowing.")
-		os.Exit(0)
-	}
+	//if answer != "y" {
+	//	fmt.Println("Not unfollowing.")
+	//	os.Exit(0)
+	//}
 
-	answerUnfollowAll := getInput("Unfollow everyone ? [yN]")
+	//answerUnfollowAll := getInput("Unfollow everyone ? [yN]")
 
 	for _, user := range users {
-		if answerUnfollowAll != "y" {
-			answerUserUnfollow := getInput("Unfollow %s ? [yN]", user.Username)
-			if answerUserUnfollow != "y" {
-				userWhitelist = append(userWhitelist, user.Username)
-				continue
-			}
-		}
+		//	if answerUnfollowAll != "y" {
+		//	answerUserUnfollow := getInput("Unfollow %s ? [yN]", user.Username)
+		//	if answerUserUnfollow != "y" {
+		//		userWhitelist = append(userWhitelist, user.Username)
+		//		continue
+		//	}
+		//}
 		userBlacklist = append(userBlacklist, user.Username)
-		if !dev {
-			user.Unfollow()
-		}
+		user.Unfollow()
 		time.Sleep(6 * time.Second)
 	}
 }
@@ -149,7 +147,7 @@ func (myInstabot Instabot) goThrough(images *goinsta.FeedTag) {
 			break
 		}
 
-		if checkedUser[image.User.Username] && noduplicate {
+		if checkedUser[image.User.Username] {
 			continue
 		}
 
@@ -217,9 +215,7 @@ func (myInstabot Instabot) followUser(user *goinsta.User) {
 	//check(err)
 
 	if !user.Friendship.Following {
-		if !dev {
-			user.Follow()
-		}
+		user.Follow()
 		log.Println("Followed")
 		numFollowed++
 		report[line{tag, "follow"}]++
@@ -231,9 +227,7 @@ func (myInstabot Instabot) followUser(user *goinsta.User) {
 func (myInstabot Instabot) likeImage(image goinsta.Item) {
 	log.Println("Liking the picture")
 	if !image.HasLiked {
-		if !dev {
-			image.Like()
-		}
+		image.Like()
 		log.Println("Liked")
 		numLiked++
 		report[line{tag, "like"}]++
@@ -245,21 +239,19 @@ func (myInstabot Instabot) likeImage(image goinsta.Item) {
 func (myInstabot Instabot) commentImage(image goinsta.Item) {
 	rand.Seed(time.Now().Unix())
 	text := commentsList[rand.Intn(len(commentsList))]
-	if !dev {
-		comments := image.Comments
-		if comments == nil {
-			// What is it?
-			newComments := goinsta.Comments{}
-			rs := reflect.ValueOf(&newComments).Elem()
-			rf := rs.FieldByName("item")
-			rf = reflect.NewAt(rf.Type(), unsafe.Pointer(rf.UnsafeAddr())).Elem()
-			item := reflect.New(reflect.TypeOf(image))
-			item.Elem().Set(reflect.ValueOf(image))
-			rf.Set(item)
-			newComments.Add(text)
-		} else {
-			comments.Add(text)
-		}
+	comments := image.Comments
+	if comments == nil {
+		// What is it?
+		newComments := goinsta.Comments{}
+		rs := reflect.ValueOf(&newComments).Elem()
+		rf := rs.FieldByName("item")
+		rf = reflect.NewAt(rf.Type(), unsafe.Pointer(rf.UnsafeAddr())).Elem()
+		item := reflect.New(reflect.TypeOf(image))
+		item.Elem().Set(reflect.ValueOf(image))
+		rf.Set(item)
+		newComments.Add(text)
+	} else {
+		comments.Add(text)
 	}
 	log.Println("Commented " + text)
 	numCommented++

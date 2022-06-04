@@ -1,0 +1,6 @@
+#dog has been liked 3 times 
+#dog has been followed 2 times
+#dog has been commented 2 times
+#cat has been liked 3 times 
+#cat has been followed 1 time
+#cat has been commented 1 time
