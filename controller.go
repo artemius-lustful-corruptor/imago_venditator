@@ -7,11 +7,8 @@ import (
 	"log"
 	"math/rand"
 	"os"
-	"reflect"
 	"strings"
 	"time"
-	"unsafe"
-
 	"github.com/Davincible/goinsta"
 	"github.com/spf13/viper"
 )
@@ -63,7 +60,6 @@ func (myInstabot Instabot) syncFollowers() {
 
 	for following.Next() {
 		for _, user := range following.Users {
-			log.Println(*user)
 			followingUsers = append(followingUsers, *user)
 		}
 	}
@@ -89,26 +85,10 @@ func (myInstabot Instabot) syncFollowers() {
 		return
 	}
 
-	//fmt.Printf("\n%d users are not following you back!\n", len(users))
-	//answer := getInput("Do you want to review these users ? [yN]")
-
-	//if answer != "y" {
-	//	fmt.Println("Not unfollowing.")
-	//	os.Exit(0)
-	//}
-
-	//answerUnfollowAll := getInput("Unfollow everyone ? [yN]")
-
 	for _, user := range users {
-		//	if answerUnfollowAll != "y" {
-		//	answerUserUnfollow := getInput("Unfollow %s ? [yN]", user.Username)
-		//	if answerUserUnfollow != "y" {
-		//		userWhitelist = append(userWhitelist, user.Username)
-		//		continue
-		//	}
-		//}
 		userBlacklist = append(userBlacklist, user.Username)
 		user.Unfollow()
+		log.Println(user.Username + " has been unfollowed")
 		time.Sleep(6 * time.Second)
 	}
 }
@@ -125,7 +105,6 @@ func (myInstabot Instabot) loopTags() {
 		numFollowed = 0
 		numLiked = 0
 		numCommented = 0
-		// They have share memory?
 		myInstabot.browse()
 	}
 	buildReport()
@@ -173,7 +152,7 @@ func (myInstabot Instabot) goThrough(images *goinsta.FeedTag) {
 		comment := followerCount > commentLowerLimit && followerCount < commentUpperLimit && numCommented < limits["comment"] && like
 
 		skip := false
-		following := myInstabot.Insta.Account.Following() //????
+		following := myInstabot.Insta.Account.Following()
 
 		var followingUsers []goinsta.User
 		for following.Next() {
@@ -211,8 +190,6 @@ func (myInstabot Instabot) goThrough(images *goinsta.FeedTag) {
 
 func (myInstabot Instabot) followUser(user *goinsta.User) {
 	log.Printf("Following %s\n", user.Username)
-	//err := user.FriendShip()
-	//check(err)
 
 	if !user.Friendship.Following {
 		user.Follow()
@@ -240,22 +217,16 @@ func (myInstabot Instabot) commentImage(image goinsta.Item) {
 	rand.Seed(time.Now().Unix())
 	text := commentsList[rand.Intn(len(commentsList))]
 	comments := image.Comments
+
 	if comments == nil {
-		// What is it?
-		newComments := goinsta.Comments{}
-		rs := reflect.ValueOf(&newComments).Elem()
-		rf := rs.FieldByName("item")
-		rf = reflect.NewAt(rf.Type(), unsafe.Pointer(rf.UnsafeAddr())).Elem()
-		item := reflect.New(reflect.TypeOf(image))
-		item.Elem().Set(reflect.ValueOf(image))
-		rf.Set(item)
-		newComments.Add(text)
+		image.Comment(text)
 	} else {
 		comments.Add(text)
 	}
+
 	log.Println("Commented " + text)
 	numCommented++
-	report[line{tag, "comment"}]++ //what is line[{tag, comment}]
+	report[line{tag, "comment"}]++
 }
 
 func (myInstabot Instabot) browse() {
@@ -273,7 +244,6 @@ func (myInstabot Instabot) browse() {
 
 		myInstabot.goThrough(images)
 
-		// ??? limits.maxRetry
 		if viper.IsSet("limits.maxRetry") && i > viper.GetInt("limits.maxRetry") {
 			log.Println("Currentrly not enough images for this tag to achieve goals")
 			break

@@ -88,11 +88,7 @@ func getConfig() {
 	userBlacklist = viper.GetStringSlice("blacklist")
 	userWhitelist = viper.GetStringSlice("whitelist")
 
-	// type Report struct {
-	// Tag, Action string
-	// }
 	report = make(map[line]int)
-	// shared memory????
 }
 
 
@@ -107,13 +103,11 @@ func retry(maxAttempts int, sleep time.Duration, function func() error) (err err
 		}
 		log.Println("Retrying after error:", err)
 	}
-	//fmt.Sprintf("The script has stopped due to an unecoverable error :\n%s", err), false
 	return fmt.Errorf("After %d attempts, last error: %s", maxAttempts, err)
 }
 
 func buildLine() {
 	reportTag := ""
-	// ?????
 	for index, element := range report {
 		if index.Tag == tag {
 			reportTag += fmt.Sprintf("%s %d/%d - ", index.Action, element, limits[index.Action])

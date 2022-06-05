@@ -1,4 +1,4 @@
-module image-vendicator
+module image_venditator
 
 go 1.18
 

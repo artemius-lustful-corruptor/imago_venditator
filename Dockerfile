@@ -10,7 +10,4 @@ RUN go mod download
 
 COPY *.go ./
 COPY config.json ./
-COPY entrypoint.sh ./
-RUN go build -o image-vendicator
-
-CMD ["./entrypoint.sh"]
+RUN go build -o image_venditator
